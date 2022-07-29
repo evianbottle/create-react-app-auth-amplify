@@ -2,28 +2,41 @@ import {Button, Card, Input, Grid} from '@material-ui/core'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
+import Box from '@mui/material/Box';
 
 import './itemCard.css'
 
 const ItemDetailCard = (props) => {
 
   const {
-    details
+    details,
+    submitBid
   } = props
   const [bidAmt, setBidAmt] = React.useState('');
+  const [bidder, setBidder] = React.useState('');
+  const [phone, setPhone] = React.useState('');
 
   const columns = [
     { field: 'bidder', headerName: 'Name'},
     { field: 'bidAmt', headerName: 'Bid Amount'},
-    { field: 'datetime', headerName: 'Bid Time'},
   ];
 
   const generateBidList =  details.bidList.bids.filter(bid => bid.success).reverse().map((item, id) => {
-    console.log(item)
       return {...item, bidAmt: `$${item.bidAmt}`, id: id + 1}
   });
   
-  console.log(generateBidList)
+  const updateName = (event) => {
+    setBidder(event.target.value)
+  }
+
+  const updatePhone = (event) => {
+    setPhone(event.target.value)
+  }
+
+  const updateBid = (event) => {
+    setBidAmt(event.target.value)
+  }
+
   return(
     <Grid container>
       <Grid item xs={1} />
@@ -41,24 +54,53 @@ const ItemDetailCard = (props) => {
           <div className='description'>
             {details.description}
           </div>
-          <div className="current">
-            Current Bid: $
-            {details.currentBid}
+          <div style={{width: "100%"}}>
+            <div className="current">
+              Current Bid: $
+              {details.currentBid}
+            </div>
+            <div className="current">
+              Minimum Bid Increase: $
+              {details.minInc}
+            </div>
           </div>
-          <div className="current">
-            Minimum Bid Increase: $
-            {details.minInc}
-          </div>
-          <div className="details-button">
+          <div style={{width:"100%"}}>
+          <Box component="form" autoComplete="off">
+            <div>
+            <Input
+              value={bidder}
+              onChange={updateName}
+              placeholder="Name"
+            />
+            </div>
+            <div>
+            <Input
+              value={phone}
+              onChange={updatePhone}
+              placeholder="Phone #"
+            />
+            </div>
+            <div>
             <Input
               value={bidAmt}
-              onChange={(e,v) => setBidAmt(v)}
+              onChange={updateBid}
+              placeholder="Bid Amount"
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*'}}
               />
+              </div>
+            <div>
             <Button
-              onClick={() => alert(`You bid $${bidAmt} on this??`)}
+              onClick={() => submitBid({
+                bidId: props.id,
+                user: bidder,
+                bidAmt: bidAmt,
+                phone: phone
+              })}
             >
-              Submit
+              Place Bid
             </Button>
+            </div>
+          </Box>
           </div>
         </Card>
         <Card style={{marginTop: '20px'}}>

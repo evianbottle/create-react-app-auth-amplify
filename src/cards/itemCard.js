@@ -7,7 +7,7 @@ let ItemCard = (props) => {
 
   const {
     title,
-    imgUrl,
+    s3_url,
     current,
     id
   } = props
@@ -18,7 +18,7 @@ let ItemCard = (props) => {
         {title}
       </h3>
       <div className="imgHolder">
-        <img src={imgUrl} style={{width: '90%'}}/>
+        <img src={`${s3_url}`} style={{width: '90%'}}/>
       </div>
       <div className="current">
         Current Bid: $

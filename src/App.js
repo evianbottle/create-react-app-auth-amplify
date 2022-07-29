@@ -7,11 +7,10 @@ import {
   useParams
 } from 'react-router-dom'
 import './App.css';
-import {Card, Grid} from '@material-ui/core'
+import {Card, Grid, IconButton} from '@material-ui/core'
+import CloseIcon from '@mui/icons-material/Close'
 import ItemCard from './cards/itemCard'
 import ItemDetailCard from './cards/detailCard'
-import play from './img/play.PNG'
-import five from './img/high-five.jpg'
 import Register from './register'
 import Login from './login'
 import React from 'react'
@@ -20,34 +19,14 @@ import awsconfig from './aws-exports'
 //import { AmplifySignOut, withAuthenticator } from '@aws-amplify/ui-react'
 //import { Authenticator } from '@aws-amplify/ui-react';
 import {getAllItems, postBid} from './api'
+import { Snackbar } from '@mui/material';
 
-//Amplify.configure(awsconfig);
 
-// const itemCardList = [
-//   {
-//     title: "Item 1",
-//     imgUrl: play,//"https://nofrillsmenubucket.s3.amazonaws.com/frame.png",
-//     current: "$157",
-//     desc: "It's the play button from the Blizz launcher. Not sure why you would bid on this",
-//     id: 1,
-//     minInc: 3
-//   },
-//   {
-//     title: "High Five with Evan!",
-//     imgUrl: five,
-//     current: "$1",
-//     desc: "If you win this item, you will get 1 (one) high five from the dude in this picture.  Don't know why you'd want that...",
-//     id: 2,
-//     minInc: 1
-//   },
-// ]
-
-const itemCardList = [{"id":"0","description":"You get one (1) high five with the guy in this picture.  Not sure how you found or why you would want this item","currentBidder":"the_username","bidList":{"bids":[{"datetime":"07/25/2022, 05:54:40","bidder":"the_username","success":false,"bidAmt":6},{"datetime":"07/25/2022, 05:54:46","bidder":"the_username","success":false,"bidAmt":6},{"datetime":"07/25/2022, 05:54:57","bidder":"the_username","success":true,"bidAmt":7},{"datetime":"07/25/2022, 05:54:59","bidder":"the_username","success":false,"bidAmt":7}]},"minInc":1,"name":"High Five with Evan!","currentBid":7,"s3_url":"https://golftourneyaug21.s3.us-east-2.amazonaws.com/images/high-five.jpg"}]
-const generateCards = () => {
-  return itemCardList.map((item) => {
+const generateCards = (itemList) => {
+  return itemList.map((item) => {
     const {
       name,
-      imgUrl,
+      s3_url,
       currentBid,
       id
     } = item
@@ -55,7 +34,7 @@ const generateCards = () => {
       <Grid item xs={12} md={4}>
         <ItemCard
           title={name} 
-          imgUrl={imgUrl} 
+          s3_url={s3_url} 
           current={currentBid} 
           id={id}
         />
@@ -64,75 +43,108 @@ const generateCards = () => {
   })
 }
 
-const getDetails = (id) => {
-  const found = itemCardList.find((item) => item.id === id)
-  console.log(found)
+const getDetails = (itemList, id) => {
+
+  const found = itemList.find((item) => item.id === id)
   return found
 }
 
-const Detail = () => {
-  const { id } = useParams();
-
-  return (
-    <div className="App">
-      <div className="App-header">
-        Mansfield Golf Tournament Silent Auction
-      </div>
-      <ItemDetailCard 
-        id={id} 
-        details={getDetails(id)}
-      />
-    </div>
-  )
-}
-
-const Home = () => {
+const Home = (itemList) => {
   return (
     <div className="App">
       <div className="App-header">
         Mansfield Golf Tournament Silent Auction
       </div>
       <Grid container spacing={3}>
-        {generateCards()}
+        {generateCards(itemList)}
       </Grid>
     </div>
   )
 }
 
-const LoginPage = () => {
-  return (
-    <div className="App">
-      <div className="App-header">
-        <Login />
-      </div>
-    </div>
-  )
-}
-
-const RegisterPage = () => {
-  return (
-    <div className="App">
-      <div className="App-header">
-        <Register />
-      </div>
-    </div>
-  )
-}
 
 const  App = () => {
 
   const [user, setUser] = React.useState(null);
   const [items, setItems] = React.useState([]);
-  const [isLoading, setIsLoading ] = React.useState(false);
+  const [isLoading, setIsLoading ] = React.useState(true);
+  const [snackOpen, setSnackOpen] = React.useState(false);
+  const [bidMessage, setBidMessage] = React.useState("Message");
+  const [snackType, setSnackType] = React.useState('success');
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      setSnackOpen(false)
+    }
+    setSnackOpen(false)
+  }
+
+  const snack = (
+    <>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color='default'
+        onClick={handleClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  )
 
   React.useEffect(()=> {
-    if(items.length === 0 && !isLoading){
-      setIsLoading(true)
-      const itemList = getAllItems()
-      setItems(itemList)
+    if(items.length === 0){
+      //setIsLoading(true)
+      getAllItems().then(items => {
+        setItems(items)
+        setIsLoading(false)
+      })
     }
   })
 
+  const postNewBid = (bid) => {
+    postBid(bid).then((res) => {
+      console.log(res)
+      if (res.statusCode === 200){
+        setSnackType('success')
+      }else{
+        setSnackType('error')
+      }
+      setBidMessage(res.body.message)
+      setSnackOpen(true)
+      getAllItems().then(items => {
+        setItems(items)
+        setIsLoading(false)
+      })
+    })
+
+  }
+
+  const { id } = useParams();
+
+  if (isLoading){
+    return(
+      <div>
+        Loading
+      </div>
+    )
+  }
+
+  const Detail = () => {
+    const { id } = useParams();
+    return (
+      <div className="App">
+        <div className="App-header">
+          Mansfield Golf Tournament Silent Auction
+        </div>
+        <ItemDetailCard 
+          id={id} 
+          details={getDetails(items, id)}
+          submitBid={postNewBid}
+        />
+      </div>
+    )
+  }
   const generateLogin = () => {
     if (user) {
       return (
@@ -165,17 +177,18 @@ const  App = () => {
           {/* <AmplifySignOut /> */}
         </Grid>
         <Routes>
-          <Route path="/login" element={LoginPage()} >
-          </Route>
-          <Route path="/register" element={RegisterPage()} />
-          <Route path='/:id' element={<Detail />}>
-
-          </Route>
-          <Route exact path='/' element={Home()}>
-            
-          </Route>
+          <Route path='/:id' element={<Detail />} />
+          <Route exact path='/' element={Home(items)} />
         </Routes>
       </Router>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={5000}
+        onClose={handleClose}
+        message={bidMessage}
+        action={snack}
+        severity={snackType}
+      />
     </>
   );
 }

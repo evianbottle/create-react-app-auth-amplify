@@ -3,7 +3,7 @@ import axios from 'axios'
 export async function getAllItems() {
     try{
         const response = await axios.get('https://es6lidg23b.execute-api.us-east-1.amazonaws.com/prod/items');
-        return response.data;
+        return response.data.body.items;
     }catch(error) {
         return []
     }
