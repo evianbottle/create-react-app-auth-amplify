@@ -135,7 +135,7 @@ const  App = () => {
     return (
       <div className="App">
         <div className="App-header">
-          Mansfield Golf Tournament Silent Auction
+          Wendy Sardella Memorial Silent Auction
         </div>
         <ItemDetailCard 
           id={id} 
