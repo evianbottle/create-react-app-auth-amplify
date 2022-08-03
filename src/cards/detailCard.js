@@ -1,4 +1,13 @@
-import {Button, Card, Input, Grid} from '@material-ui/core'
+import {
+  Button,
+  Card, 
+  Input, 
+  Grid, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions,
+} from '@material-ui/core'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
@@ -6,15 +15,19 @@ import Box from '@mui/material/Box';
 
 import './itemCard.css'
 
+
+
 const ItemDetailCard = (props) => {
 
   const {
     details,
-    submitBid
+    submitBid,
+    id
   } = props
   const [bidAmt, setBidAmt] = React.useState('');
   const [bidder, setBidder] = React.useState('');
   const [phone, setPhone] = React.useState('');
+  const [dOpen, setDOpen] = React.useState(false);
 
   const columns = [
     { field: 'bidder', headerName: 'Name'},
@@ -35,6 +48,56 @@ const ItemDetailCard = (props) => {
 
   const updateBid = (event) => {
     setBidAmt(event.target.value)
+  }
+
+  const disabled = () => {
+    return bidAmt === '' || bidder === '' || phone === '' || isNaN(bidAmt)
+  }
+
+
+  const ConfirmationDialog = (props) =>{
+    const { dOpen} = props;
+  
+    const handleCancel = () => {
+      setDOpen(false);
+    };
+  
+    const handleSubmit = () => {
+      submitBid({
+        bidId: id,
+        user: bidder,
+        bidAmt: bidAmt,
+        phone: phone
+      })
+      setDOpen(false);
+    }
+
+    return (
+      <Dialog
+        sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435 } }}
+        maxWidth="xs"
+        open={dOpen}
+      >
+        <DialogTitle>Confirm Bid</DialogTitle>
+        <DialogContent>
+          <div>
+            {`Bidder: ${bidder}`}
+          </div>
+          <div>
+            {`Contact Number: ${phone}`}
+          </div>
+          <div>
+            {`Bid Amount: $${bidAmt}`}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+    );
   }
 
   return(
@@ -90,12 +153,10 @@ const ItemDetailCard = (props) => {
               </div>
             <div>
             <Button
-              onClick={() => submitBid({
-                bidId: props.id,
-                user: bidder,
-                bidAmt: bidAmt,
-                phone: phone
-              })}
+              onClick={() => setDOpen(true)}
+              variant="contained"
+              id="submit-button"
+              disabled={disabled()}
             >
               Place Bid
             </Button>
@@ -115,6 +176,9 @@ const ItemDetailCard = (props) => {
           </div>
         </Card>
       </Grid> 
+      <ConfirmationDialog 
+        dOpen={dOpen}
+      />
     </Grid>
   )
 }
