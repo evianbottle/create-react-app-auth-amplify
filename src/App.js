@@ -23,7 +23,7 @@ import { Snackbar } from '@mui/material';
 
 
 const generateCards = (itemList) => {
-  return itemList.map((item) => {
+  return itemList.filter((item) => item.id !== "0").map((item) => {
     const {
       name,
       s3_url,
@@ -135,7 +135,7 @@ const  App = () => {
     return (
       <div className="App">
         <div className="App-header">
-          Wendy Sardella Memorial Silent Auction
+          Mansfield Golf Tournament Silent Auction
         </div>
         <ItemDetailCard 
           id={id} 

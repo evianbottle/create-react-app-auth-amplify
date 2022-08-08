@@ -1,18 +1,18 @@
 .imgHolder{
-  width:80%;
-  padding: 10px 10%;
-}
+    width:80%;
+    padding: 10px 10%;
+  }
+  
+  .current{
+    padding-left: 20px;
+    padding-top: 17px;
+  }
+  
+  .details-button{
+    float: right;
+    padding: 10px;
+  }
 
-.current{
-  padding-left: 20px;
-  padding-top: 17px;
-}
-
-.details-button{
-  float: right;
-  padding: 10px;
-}
-
-#submit-button{
-  margin: 10px;
-}
+  #submit-button{
+    margin: 10px;
+  }

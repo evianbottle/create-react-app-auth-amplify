@@ -126,6 +126,10 @@ const ItemDetailCard = (props) => {
               Minimum Bid Increase: $
               {details.minInc}
             </div>
+            <div className="current">
+              Value: $
+              {details.value}
+            </div>
           </div>
           <div style={{width:"100%"}}>
           <Box component="form" autoComplete="off">
